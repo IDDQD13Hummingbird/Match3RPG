@@ -12,12 +12,13 @@ public class ToggleButtonText : MonoBehaviour
         {
             toggleButtonText.text = "OFF";
             toggleButtonText.transform.position += new Vector3(5f, 0, 0);
-            toggleButtonText.color = new Color(1f, .5f, 0.2f, 1f); // Change color to red
+            toggleButtonText.color = new Color(0.28f, 0.28f, 0.28f, 1f); 
         }
         else
         {
             toggleButtonText.text = "ON";
             toggleButtonText.transform.position += new Vector3(-5f, 0, 0);
+            toggleButtonText.color = new Color(0.044f, 0.33f, 0f, 1f); 
         }
     }
 
