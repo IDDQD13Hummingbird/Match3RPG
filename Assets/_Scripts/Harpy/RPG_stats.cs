@@ -36,10 +36,12 @@ public class RPG_stats
 {    public string characterName;
     public float maxHealth;
     public float damage;
+    [Tooltip("The characters with the higher speed go first in the battle turns.")]
     public int maxSpeed;    public int level;
-    public bool alive; // True - alive, False - dead
     public Team team; // Hero or Enemy
     public Hero heroType; // Only relevant when team is Hero
+    public bool alive; // True - alive, False - dead
+
 
     public float currentHealth; // Current health of the target
     public int currentSpeed; // Current initiative of the target
@@ -78,10 +80,14 @@ public class RPG_stats
         this.maxHealth = this.level * 15;
         this.damage = this.level * 5;
         this.maxSpeed = this.level * 3;
+    }
 
-        // Initialize current stats
-        this.currentHealth = this.maxHealth;
-        this.currentSpeed = this.maxSpeed;
+    public (float health, float damage, int speed) GetCalculatedEnemyStats()
+    {
+        float health = this.level * 15;
+        float damage = this.level * 5;
+        int speed = this.level * 3;
+        return (health, damage, speed);
     }
 
     public void CalculateHeroStats(Hero heroType)
