@@ -40,7 +40,7 @@ public class RPG_stats
     public int maxSpeed;    public int level;
     public Team team; // Hero or Enemy
     public Hero heroType; // Only relevant when team is Hero
-    public bool alive; // True - alive, False - dead
+    public bool alive = true; // True - alive, False - dead
 
 
     public float currentHealth; // Current health of the target

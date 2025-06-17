@@ -10,8 +10,7 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
         
         // Draw a foldout for the RPG_stats
         property.isExpanded = EditorGUI.Foldout(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight), property.isExpanded, label);
-        
-        if (property.isExpanded)
+          if (property.isExpanded)
         {
             EditorGUI.indentLevel++;
             float yOffset = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
@@ -26,7 +25,13 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
             var heroTypeProp = property.FindPropertyRelative("heroType");
             var aliveProp = property.FindPropertyRelative("alive");
             var currentHealthProp = property.FindPropertyRelative("currentHealth");
-            var currentSpeedProp = property.FindPropertyRelative("currentSpeed");              if (characterNameProp != null)
+            var currentSpeedProp = property.FindPropertyRelative("currentSpeed");
+            
+            // Auto-initialize alive to true for new characters
+            if (aliveProp != null && !aliveProp.boolValue)
+            {
+                aliveProp.boolValue = true;
+            }if (characterNameProp != null)
             {
                 // Dynamic label based on team
                 string nameLabel = "Character Name";
@@ -34,15 +39,25 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
                 {
                     nameLabel = teamProp.enumValueIndex == 0 ? "Hero Name" : "Enemy Name";
                 }
+                EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), characterNameProp, new GUIContent(nameLabel));
+                if (EditorGUI.EndChangeCheck() && !string.IsNullOrEmpty(characterNameProp.stringValue))
+                {
+                    // When character name is set, ensure they are alive
+                    if (aliveProp != null)
+                        aliveProp.boolValue = true;
+                }
                 yOffset += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-            }
-              if (levelProp != null)
+            }              if (levelProp != null)
             {
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), levelProp);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    // When level is set to a positive value, ensure character is alive
+                    if (levelProp.intValue > 0 && aliveProp != null)
+                        aliveProp.boolValue = true;
+                    
                     // Check if team is Enemy and auto-calculate stats
                     if (teamProp != null && teamProp.enumValueIndex == 1) // Enemy team
                     {
@@ -75,11 +90,13 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
                 if (isEnemy) EditorGUI.BeginDisabledGroup(true);
                 
                 EditorGUI.BeginChangeCheck();
-                EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), maxHealthProp);
-                if (EditorGUI.EndChangeCheck() && currentHealthProp != null)
+                EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), maxHealthProp);                if (EditorGUI.EndChangeCheck() && currentHealthProp != null)
                 {
                     // Sync currentHealth with maxHealth when maxHealth changes
                     currentHealthProp.floatValue = maxHealthProp.floatValue;
+                    // Ensure character is alive when health is set to a positive value
+                    if (maxHealthProp.floatValue > 0 && aliveProp != null)
+                        aliveProp.boolValue = true;
                 }
                 
                 if (isEnemy) EditorGUI.EndDisabledGroup();
@@ -115,32 +132,38 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
             }
             
             if (teamProp != null)
-            {
-                EditorGUI.BeginChangeCheck();
-                EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), teamProp);                if (EditorGUI.EndChangeCheck() && teamProp.enumValueIndex == 1) // Changed to Enemy
+            {                EditorGUI.BeginChangeCheck();
+                EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), teamProp);                if (EditorGUI.EndChangeCheck())
                 {
-                    // Auto-calculate enemy stats when team is changed to Enemy
-                    if (levelProp != null && levelProp.intValue > 0)
+                    // When team is set, ensure character is alive
+                    if (aliveProp != null)
+                        aliveProp.boolValue = true;
+                    
+                    if (teamProp.enumValueIndex == 1) // Changed to Enemy
                     {
-                        // Calculate enemy stats directly using the level value
-                        int level = levelProp.intValue;
-                        float health = level * 15f;
-                        float damage = level * 5f;
-                        int speed = level * 3;
-                        
-                        // Apply calculated values
-                        if (maxHealthProp != null)
-                            maxHealthProp.floatValue = health;
-                        if (damageProp != null)
-                            damageProp.floatValue = damage;
-                        if (maxSpeedProp != null)
-                            maxSpeedProp.intValue = speed;
-                        
-                        // Sync current values
-                        if (currentHealthProp != null)
-                            currentHealthProp.floatValue = health;
-                        if (currentSpeedProp != null)
-                            currentSpeedProp.intValue = speed;
+                        // Auto-calculate enemy stats when team is changed to Enemy
+                        if (levelProp != null && levelProp.intValue > 0)
+                        {
+                            // Calculate enemy stats directly using the level value
+                            int level = levelProp.intValue;
+                            float health = level * 15f;
+                            float damage = level * 5f;
+                            int speed = level * 3;
+                            
+                            // Apply calculated values
+                            if (maxHealthProp != null)
+                                maxHealthProp.floatValue = health;
+                            if (damageProp != null)
+                                damageProp.floatValue = damage;
+                            if (maxSpeedProp != null)
+                                maxSpeedProp.intValue = speed;
+                            
+                            // Sync current values
+                            if (currentHealthProp != null)
+                                currentHealthProp.floatValue = health;
+                            if (currentSpeedProp != null)
+                                currentSpeedProp.intValue = speed;
+                        }
                     }
                 }
                 yOffset += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
