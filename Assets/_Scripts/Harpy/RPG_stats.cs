@@ -27,25 +27,24 @@ public enum Hero
 {
     Wizard,
     Barbarian,
-    Rouge,
+    Rogue,
     Healer
 }
 
 [System.Serializable]
 public class RPG_stats
-{
-    public string characterName;
+{    public string characterName;
     public float maxHealth;
     public float damage;
-    public int maxSpeed;
-    public int level;
+    public int maxSpeed;    public int level;
     public bool alive; // True - alive, False - dead
     public Team team; // Hero or Enemy
+    public Hero heroType; // Only relevant when team is Hero
 
     public float currentHealth; // Current health of the target
-    public int currentSpeed;    // Current initiative of the target
+    public int currentSpeed; // Current initiative of the target
 
-    public RPG_stats(string characterName, float maxHealth, float damage, int maxSpeed, int level, Team team, bool alive = true)
+    public RPG_stats(string characterName, float maxHealth, float damage, int maxSpeed, int level, Team team, Hero heroType = Hero.Wizard, bool alive = true)
     {
         this.characterName = characterName;
         this.maxHealth = maxHealth;
@@ -54,7 +53,9 @@ public class RPG_stats
         this.level = level;
         this.alive = true;
         this.currentHealth = maxHealth; // Initialize current health to max health
-        this.currentSpeed = maxSpeed; // Initialize current speed to max speed        this.team = team;
+        this.currentSpeed = maxSpeed; // Initialize current speed to max speed
+        this.team = team;
+        this.heroType = heroType; // Only used when team is Hero
     }
 
     public void UpdateHealth(float change)
@@ -70,19 +71,24 @@ public class RPG_stats
         if(alive){
             Debug.Log($"{characterName} - Current Health: {currentHealth}, Current initiative: {currentSpeed}");
         }
-    }    public void CalculateEnemyStats()
+    }
+
+    public void CalculateEnemyStats()
     {
         this.maxHealth = this.level * 15;
         this.damage = this.level * 5;
         this.maxSpeed = this.level * 3;
-        
+
         // Initialize current stats
         this.currentHealth = this.maxHealth;
         this.currentSpeed = this.maxSpeed;
-    }    public void CalculateHeroStats(Hero heroType)
+    }
+
+    public void CalculateHeroStats(Hero heroType)
     {
         // Assign stats to everyone individually. Maybe work with fraction multiplications and basic +1's.
-        if(heroType == Hero.Barbarian){
+        if (heroType == Hero.Barbarian)
+        {
             this.maxHealth = this.level * 15;
             this.damage = this.level * 5;
             this.maxSpeed = this.level * 3;
@@ -99,13 +105,13 @@ public class RPG_stats
             this.damage = this.level * 3;
             this.maxSpeed = this.level * 5;
         }
-        else if (heroType == Hero.Rouge)
+        else if (heroType == Hero.Rogue)
         {
             this.maxHealth = this.level * 11;
             this.damage = this.level * 6;
             this.maxSpeed = this.level * 7;
         }
-        
+
         // Initialize current stats after calculating max stats
         this.currentHealth = this.maxHealth;
         this.currentSpeed = this.maxSpeed;
