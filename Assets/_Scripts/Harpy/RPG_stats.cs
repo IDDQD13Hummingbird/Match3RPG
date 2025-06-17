@@ -31,77 +31,83 @@ public enum Hero
     Healer
 }
 
-public class RPG_stats : MonoBehaviour
+[System.Serializable]
+public class RPG_stats
 {
-    {
-    public string name;
-    public float health;
+    public string characterName;
+    public float maxHealth;
     public float damage;
-    public int speed;
+    public int maxSpeed;
     public int level;
-    public bool isalive; // True - alive, False - dead
+    public bool alive; // True - alive, False - dead
+    public Team team; // Hero or Enemy
 
-    public float my_health; // Current health of the target
-    public int my_speed;    // Current initiative of the target
+    public float currentHealth; // Current health of the target
+    public int currentSpeed;    // Current initiative of the target
 
-
-
-    public RPG_Stats(string name, float health, float damage, int speed, int level)
+    public RPG_stats(string characterName, float maxHealth, float damage, int maxSpeed, int level, Team team, bool alive = true)
     {
-        this.name = name;
-        this.level = level;
-        this.health = health;
+        this.characterName = characterName;
+        this.maxHealth = maxHealth;
         this.damage = damage;
-        this.speed = speed;
+        this.maxSpeed = maxSpeed;
+        this.level = level;
+        this.alive = true;
+        this.currentHealth = maxHealth; // Initialize current health to max health
+        this.currentSpeed = maxSpeed; // Initialize current speed to max speed        this.team = team;
     }
 
     public void UpdateHealth(float change)
     {
-        health += change;
-        isalive = health > 0;
+        currentHealth += change;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Ensure health stays between 0 and maxHealth
+        alive = currentHealth > 0;
     }
 
     public void DisplayInfo()
     {
-        Debug.Log($"{name} - Health: {health}, Damage: {damage}, Speed: {speed}, Level: {level}, Alive? - {isalive}");
-        if(isalive){
-            Debug.Log($"{name} - Current Health: {my_health}, Current initiative: {my_speed}");
+        Debug.Log($"{characterName} - Health: {maxHealth}, Damage: {damage}, Speed: {maxSpeed}, Level: {level}, Alive? - {alive}");
+        if(alive){
+            Debug.Log($"{characterName} - Current Health: {currentHealth}, Current initiative: {currentSpeed}");
         }
-    }
-
-    public void CalculateEnemyStats()
+    }    public void CalculateEnemyStats()
     {
-        this.health = this.level * 15;
+        this.maxHealth = this.level * 15;
         this.damage = this.level * 5;
-        this.speed = this.level * 3;
-    }
-
-    public void CalculateHeroStats(enum Hero)
+        this.maxSpeed = this.level * 3;
+        
+        // Initialize current stats
+        this.currentHealth = this.maxHealth;
+        this.currentSpeed = this.maxSpeed;
+    }    public void CalculateHeroStats(Hero heroType)
     {
-    // Assign statsto everyone individually. Maybe work with fraction multiplications and basic +1's.
-    if(Hero = Barbarian){
-        this.health = this.level * 15;
-        this.damage = this.level * 5;
-        this.speed = this.level * 3;
+        // Assign stats to everyone individually. Maybe work with fraction multiplications and basic +1's.
+        if(heroType == Hero.Barbarian){
+            this.maxHealth = this.level * 15;
+            this.damage = this.level * 5;
+            this.maxSpeed = this.level * 3;
         }
-    if (Hero = Wizard)
-    {
-        this.health = this.level * 15;
-        this.damage = this.level * 5;
-        this.speed = this.level * 3;
-    }
-    if (Hero = Healer)
-    {
-        this.health = this.level * 15;
-        this.damage = this.level * 5;
-        this.speed = this.level * 3;
-    }
-    if (Hero = Rouge)
-    {
-        this.health = this.level * 15;
-        this.damage = this.level * 5;
-        this.speed = this.level * 3;
-    }
-
+        else if (heroType == Hero.Wizard)
+        {
+            this.maxHealth = this.level * 12;
+            this.damage = this.level * 8;
+            this.maxSpeed = this.level * 4;
+        }
+        else if (heroType == Hero.Healer)
+        {
+            this.maxHealth = this.level * 10;
+            this.damage = this.level * 3;
+            this.maxSpeed = this.level * 5;
+        }
+        else if (heroType == Hero.Rouge)
+        {
+            this.maxHealth = this.level * 11;
+            this.damage = this.level * 6;
+            this.maxSpeed = this.level * 7;
+        }
+        
+        // Initialize current stats after calculating max stats
+        this.currentHealth = this.maxHealth;
+        this.currentSpeed = this.maxSpeed;
     }
 }
