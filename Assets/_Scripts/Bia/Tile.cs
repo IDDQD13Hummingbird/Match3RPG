@@ -3,50 +3,50 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     public GameObject[] icons;
-    private int tileType=-1;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private int tileType = -1;
+
     void Start()
     {
+        // Only initialize if not already initialized by Board
         if (tileType == -1)
         {
             Initialize();
         }
     }
 
-    public int getTileType()
-    {
-        return tileType;
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void Initialize()
     {
         int IconToUse = Random.Range(0, icons.Length);
-        GameObject icon = Instantiate(icons[IconToUse], transform.position, Quaternion.identity);
-        //icon.transform.parent = this.transform;
-        //icon.name = this.gameObject.name;
+        CreateIcon(IconToUse);
     }
 
-    public void InitializeByType(int Type, GameObject[] IconsArray)
+    // New method to be called by Board with a specific icon type
+    public void InitializeWithType(int iconType, GameObject[] iconArray)
     {
-        tileType = Type;
-        icons = IconsArray;
-        CreateIcon(Type);
+        tileType = iconType;
+        icons = iconArray; // Use the same icon array as Board
+        CreateIcon(iconType);
     }
 
-    private void CreateIcon(int Type)
+    private void CreateIcon(int iconType)
     {
-        //int IconToUse = Random.Range(0, icons.Length);
-        if (Type >= 0 && Type < icons.Length)
+        if (iconType >= 0 && iconType < icons.Length)
         {
-            GameObject icon = Instantiate(icons[Type], transform.position, Quaternion.identity);
+            GameObject icon = Instantiate(icons[iconType], transform.position, Quaternion.identity);
             icon.transform.parent = this.transform;
             icon.name = this.gameObject.name;
-        }  
+        }
     }
+
+    // Getter for tile type
+    public int GetTileType()
+    {
+        return tileType;
+    }
+
 }
