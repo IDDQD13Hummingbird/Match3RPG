@@ -95,26 +95,26 @@ public class RPG_stats
         // Assign stats to everyone individually. Maybe work with fraction multiplications and basic +1's.
         if (heroType == Hero.Barbarian)
         {
-            this.maxHealth = this.level * 15;
+            this.maxHealth = this.level * 14;
             this.damage = this.level * 5;
-            this.maxSpeed = this.level * 3;
+            this.maxSpeed = this.level * 5;
         }
         else if (heroType == Hero.Wizard)
         {
             this.maxHealth = this.level * 12;
-            this.damage = this.level * 8;
+            this.damage = this.level * 6; //We aren't sure what exactly Wizard will do, but we're assuming that they'll either be a very heavy damage dealer, or a shielder.
             this.maxSpeed = this.level * 4;
         }
         else if (heroType == Hero.Healer)
         {
             this.maxHealth = this.level * 10;
-            this.damage = this.level * 3;
-            this.maxSpeed = this.level * 5;
+            this.damage = this.level * 8;
+            this.maxSpeed = this.level * 3;
         }
         else if (heroType == Hero.Rogue)
         {
             this.maxHealth = this.level * 11;
-            this.damage = this.level * 6;
+            this.damage = this.level * 3;
             this.maxSpeed = this.level * 7;
         }
 
