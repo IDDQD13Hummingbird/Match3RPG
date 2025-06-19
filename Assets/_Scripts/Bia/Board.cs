@@ -6,7 +6,7 @@ public class Board : MonoBehaviour
     public int height;
     public GameObject TilePrefab;
     public GameObject[] possibleIcons; // Add this - assign the same icons array here
-
+    public GameObject[] dots;
     private Tile[,] allTiles;
     private int[,] tileTypes; // Track what icon type each tile has
 
@@ -23,10 +23,11 @@ public class Board : MonoBehaviour
         {
             for (int j = 0; j < height; j++)
             {
-                Vector2 tempPosition = new Vector2(i+gameObject.transform.position.x, j+gameObject.transform.position.y);
+                Vector2 tempPosition = new Vector2(i+gameObject.transform.position.x, j+gameObject.transform.position.y);   
                 GameObject tempTile = Instantiate(TilePrefab, tempPosition, Quaternion.identity);
                 tempTile.transform.parent = this.transform;
                 tempTile.name = "(" + i + ", " + j + ")";
+               
 
                 // Get the Tile component and assign a safe icon
                 Tile tileComponent = tempTile.GetComponent<Tile>();
