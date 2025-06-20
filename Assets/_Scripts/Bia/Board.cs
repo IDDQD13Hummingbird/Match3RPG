@@ -6,14 +6,18 @@ public class Board : MonoBehaviour
     public int height;
     public GameObject TilePrefab;
     public GameObject[] possibleIcons; // Add this - assign the same icons array here
-    public GameObject[] allDots;
+    public GameObject[,] allDots;
     private Tile[,] allTiles;
     private int[,] tileTypes; // Track what icon type each tile has
+
+    public GameObject[] icons;
+    private int tileType = -1;
 
     void Start()
     {
         allTiles = new Tile[width, height];
         tileTypes = new int[width, height];
+        allDots = new GameObject[width, height];
         CreateBoard();
     }
 
@@ -27,7 +31,9 @@ public class Board : MonoBehaviour
                 GameObject tempTile = Instantiate(TilePrefab, tempPosition, Quaternion.identity);
                 tempTile.transform.parent = this.transform;
                 tempTile.name = "(" + i + ", " + j + ")";
-               
+
+                int IconToUse = Random.Range(0, icons.Length);
+                //CreateIcon(IconToUse, tempPosition);
 
                 // Get the Tile component and assign a safe icon
                 Tile tileComponent = tempTile.GetComponent<Tile>();
@@ -38,9 +44,38 @@ public class Board : MonoBehaviour
                 tileTypes[i, j] = safeIconType;
 
                 // Initialize the tile with the safe icon type
-                tileComponent.InitializeWithType(safeIconType, possibleIcons);
+                allDots[i, j] = InitializeWithType(safeIconType, possibleIcons, tempPosition, i, j);
+                //allDots[i, j] = InitializeWithType(safeIconType, possibleIcons, tempPosition);
+                //allDots[j, i].name = "(" + i + ", " + j + ")"; 
             }
         }
+    }
+
+
+    public GameObject InitializeWithType(int iconType, GameObject[] iconArray, Vector3 Position, int i, int j)
+    {
+        tileType = iconType;
+        icons = iconArray; // Use the same icon array as Board
+        GameObject temp=CreateIcon(iconType, Position);
+        temp.name = "(" + i + ", " + j + ")";
+        return temp;
+    }
+
+    private GameObject CreateIcon(int iconType, Vector3 Position)
+    {
+        if (iconType >= 0 && iconType < icons.Length)
+        {
+            GameObject icon = Instantiate(icons[iconType], Position, Quaternion.identity);
+            icon.transform.parent = this.transform;
+            icon.name = this.gameObject.name;
+            return icon;
+        }
+        else
+        {
+            return null;
+        }
+            
+
     }
 
     private int GetSafeIconType(int x, int y)
