@@ -6,7 +6,7 @@ public class Board : MonoBehaviour
     public int height;
     public GameObject TilePrefab;
     public GameObject[] possibleIcons; // Add this - assign the same icons array here
-    public GameObject[] dots;
+    public GameObject[] allDots;
     private Tile[,] allTiles;
     private int[,] tileTypes; // Track what icon type each tile has
 
