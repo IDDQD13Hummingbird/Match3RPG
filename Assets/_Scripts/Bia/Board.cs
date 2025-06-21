@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Board : MonoBehaviour
 {
@@ -72,7 +73,34 @@ public class Board : MonoBehaviour
                 }
             }
         }
+
+        StartCoroutine(ClashRowsCo());
     }
+
+    private IEnumerator ClashRowsCo() //fill the empty space on the board after the tiles are destroyed
+    {
+        int emptySpaceCount = 0;
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (allDots[i, j] == null)
+                {
+                    emptySpaceCount++;
+                }
+                else if(emptySpaceCount>0)
+                {
+                    allDots[i, j].GetComponent<Dot>().row -= emptySpaceCount;
+                    allDots[i, j]=null;
+                }
+            }
+
+            emptySpaceCount = 0;
+        }
+        yield return new WaitForSeconds(.3f);
+
+    }
+   
 
     public GameObject InitializeWithType(int iconType, GameObject[] iconArray, Vector3 Position, int i, int j)
     {

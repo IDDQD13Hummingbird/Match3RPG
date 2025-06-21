@@ -68,12 +68,17 @@ public class Dot : MonoBehaviour
         x = column;
         y = row;
         if (Mathf.Abs(x-transform.localPosition.x)> .1){
-            //move
+            //move towards the target (targets are X and Y)
             tempPosition=new Vector2(x, transform.localPosition.y);
-            transform.localPosition = Vector2.Lerp(transform.localPosition,tempPosition, .4f );
+            transform.localPosition = Vector2.Lerp(transform.localPosition, tempPosition, .4f);
+            if (board.allDots[column, row] != this.gameObject)
+            {
+                board.allDots[column, row] = this.gameObject;
+            }
         }
         else
         {
+            //directly set position
             tempPosition = new Vector2(x, transform.localPosition.y);
             transform.localPosition = tempPosition;
             board.allDots[column, row] = this.gameObject;
@@ -83,6 +88,10 @@ public class Dot : MonoBehaviour
             //move
             tempPosition = new Vector2( transform.localPosition.x, y);
             transform.localPosition = Vector2.Lerp(transform.localPosition, tempPosition, .4f);
+            if (board.allDots[column, row] != this.gameObject)
+            {
+                board.allDots[column, row] = this.gameObject;
+            }
         }
         else
         {
