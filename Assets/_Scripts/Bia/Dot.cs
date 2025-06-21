@@ -107,10 +107,10 @@ public class Dot : MonoBehaviour
 
             }
             else
-            {
-               
+            { 
                 rowLast=row;
                 columnLast=column;
+                board.DestroyMatch();
             }
                 otherDot = null;
         }

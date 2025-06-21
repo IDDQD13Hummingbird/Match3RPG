@@ -51,6 +51,28 @@ public class Board : MonoBehaviour
         }
     }
 
+    private void DestroyMatchAt(int column, int row)
+    {
+        if (allDots[column, row].GetComponent<Dot>().isMatched)
+        {
+            Destroy(allDots[column, row]);
+            allDots[column, row]=null;
+        }
+    }
+
+    public void DestroyMatch()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (allDots[i, j] != null)
+                {
+                    DestroyMatchAt(i, j);
+                }
+            }
+        }
+    }
 
     public GameObject InitializeWithType(int iconType, GameObject[] iconArray, Vector3 Position, int i, int j)
     {
