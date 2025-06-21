@@ -10,9 +10,10 @@ public class Board : MonoBehaviour
     public GameObject[,] allDots;
     private Tile[,] allTiles;
     private int[,] tileTypes; // Track what icon type each tile has
-
+    public GameObject[] dots;
     public GameObject[] icons;
     private int tileType = -1;
+    
 
     void Start()
     {
@@ -28,28 +29,63 @@ public class Board : MonoBehaviour
         {
             for (int j = 0; j < height; j++)
             {
-                Vector2 tempPosition = new Vector2(i+gameObject.transform.position.x, j+gameObject.transform.position.y);   
+                Vector2 tempPosition =
+                    new Vector2(i + gameObject.transform.position.x, j + gameObject.transform.position.y);
                 GameObject tempTile = Instantiate(TilePrefab, tempPosition, Quaternion.identity);
                 tempTile.transform.parent = this.transform;
                 tempTile.name = "(" + i + ", " + j + ")";
+                int dotToUse = Random.Range(0, dots.Length);
+                int MaxIterations = 0;
+                while (HasGeneratedMatchOnCreation(i, j, dots[dotToUse]) && MaxIterations < 100)
+                {
+                    dotToUse = Random.Range(0, dots.Length);
+                    MaxIterations++;
+                }
 
-                int IconToUse = Random.Range(0, icons.Length);
-                //CreateIcon(IconToUse, tempPosition);
-
-                // Get the Tile component and assign a safe icon
-                Tile tileComponent = tempTile.GetComponent<Tile>();
-                allTiles[i, j] = tileComponent;
-
-                // Find a safe icon type that won't create matches
-                int safeIconType = GetSafeIconType(i, j);
-                tileTypes[i, j] = safeIconType;
-
-                // Initialize the tile with the safe icon type
-                allDots[i, j] = InitializeWithType(safeIconType, possibleIcons, tempPosition, i, j);
-                //allDots[i, j] = InitializeWithType(safeIconType, possibleIcons, tempPosition);
-                //allDots[j, i].name = "(" + i + ", " + j + ")"; 
+                MaxIterations = 0;
+                GameObject dot = Instantiate(dots[dotToUse], tempPosition, Quaternion.identity);
+                dot.transform.parent = this.transform;
+                dot.name = "(" + i + ", " + j + ")";
+                allDots[i, j] = dot;
+                //add destroy existing matches upon creation
             }
         }
+    }
+
+    private bool HasGeneratedMatchOnCreation(int column, int row, GameObject piece)
+    {
+        if (column > 1 && row > 1)
+        {
+            if (allDots[column - 1, row].tag == piece.tag && allDots[column - 2, row].tag == piece.tag)
+            {
+                return true;
+            }
+
+            if (allDots[column, row - 1].tag == piece.tag && allDots[column, row - 2].tag == piece.tag)
+            {
+                return true;
+            }
+            else if (column <= 1 || row <= 1)
+            {
+                if (row > 1)
+                {
+                    if (allDots[column, row - 1].tag == piece.tag && allDots[column, row - 2].tag == piece.tag)
+                    {
+                        return true;
+                    }
+                }
+
+                if (column > 1)
+                {
+                    if (allDots[column - 1, row].tag == piece.tag && allDots[column - 2, row].tag == piece.tag)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private void DestroyMatchAt(int column, int row)
@@ -57,7 +93,7 @@ public class Board : MonoBehaviour
         if (allDots[column, row].GetComponent<Dot>().isMatched)
         {
             Destroy(allDots[column, row]);
-            allDots[column, row]=null;
+            allDots[column, row] = null;
         }
     }
 
@@ -88,92 +124,81 @@ public class Board : MonoBehaviour
                 {
                     emptySpaceCount++;
                 }
-                else if(emptySpaceCount>0)
+                else if (emptySpaceCount > 0)
                 {
                     allDots[i, j].GetComponent<Dot>().row -= emptySpaceCount;
-                    allDots[i, j]=null;
+                    allDots[i, j] = null;
                 }
             }
 
             emptySpaceCount = 0;
         }
+
         yield return new WaitForSeconds(.3f);
-
-    }
-   
-
-    public GameObject InitializeWithType(int iconType, GameObject[] iconArray, Vector3 Position, int i, int j)
-    {
-        tileType = iconType;
-        icons = iconArray; // Use the same icon array as Board
-        GameObject temp=CreateIcon(iconType, Position);
-        temp.name = "(" + i + ", " + j + ")";
-        return temp;
-    }
-
-    private GameObject CreateIcon(int iconType, Vector3 Position)
-    {
-        if (iconType >= 0 && iconType < icons.Length)
-        {
-            GameObject icon = Instantiate(icons[iconType], Position, Quaternion.identity);
-            icon.transform.parent = this.transform;
-            icon.name = this.gameObject.name;
-            return icon;
-        }
-        else
-        {
-            return null;
-        }
-            
+        StartCoroutine(FillBoardCo());
 
     }
 
-    private int GetSafeIconType(int x, int y)
+    private bool CheckForExistingMatches()
     {
-        //// Try each possible icon type
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    if (IsSafeToPlace(x, y, i))
-        //    {
-        //        return i;
-        //    }
-        //}
-
-        while (true)
+        for (int i = 0; i < width; i++)
         {
-            int i = Random.Range(0, 4);
-
-            if (IsSafeToPlace(x, y, i))
+            for (int j = 0; j < height; j++)
             {
-                return i;
-                break;
+                if (allDots[i, j] != null)
+                {
+                    if (allDots[i, j].GetComponent<Dot>().isMatched)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+        }
+
+        return false;
+    }
+
+    private void RefillBoard()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (allDots[i, j] == null)
+                {
+                    Vector2 tempPosition = new Vector2(i + gameObject.transform.position.x,
+                        j + gameObject.transform.position.y);
+                    int dotToUse = Random.Range(0, dots.Length);
+                    GameObject piece = Instantiate(dots[dotToUse], tempPosition, Quaternion.identity);
+                    piece.transform.parent = this.transform;
+                    allDots[i, j] = piece;
+
+
+                }
             }
         }
 
-        // Fallback - this shouldn't happen with enough icon types
-        return 0;
     }
 
-    private bool IsSafeToPlace(int x, int y, int iconType)
+
+    private IEnumerator FillBoardCo()
     {
-        // Check horizontal matches (left side)
-        if (x >= 2)
+        RefillBoard();
+        yield return new WaitForSeconds(.3f);
+        while (CheckForExistingMatches())
         {
-            if (tileTypes[x - 1, y] == iconType && tileTypes[x - 2, y] == iconType)
-            {
-                return false; // Would create a horizontal match
-            }
+            yield return new WaitForSeconds(.3f);
+            DestroyMatch();
         }
 
-        // Check vertical matches (bottom side)
-        if (y >= 2)
+
+        for (int i = 0; i< allDots.GetLength(0); i++)
         {
-            if (tileTypes[x, y - 1] == iconType && tileTypes[x, y - 2] == iconType)
+            for (int j = 0; j < allDots.GetLength(1); j++)
             {
-                return false; // Would create a vertical match
+                allDots[i, j].GetComponent<Dot>().UpdateLastPosition();
             }
         }
-
-        return true; // Safe to place
     }
 }

@@ -17,7 +17,8 @@ public class Dot : MonoBehaviour
     private Board board;
     private Vector2 tempPosition;
     public float angle=0;
-   
+    public float swipeResist = .1f;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -48,9 +49,12 @@ public class Dot : MonoBehaviour
 
     void CalculateAngle()
     {
-        angle = Mathf.Atan2(lastTouchPosition.y - firstTouchPosition.y, lastTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
-        Debug.Log(angle);
-        MovePieces();
+        if(Mathf.Abs(lastTouchPosition.y - firstTouchPosition.y) > swipeResist || Mathf.Abs(lastTouchPosition.x - firstTouchPosition.x)> swipeResist){
+            angle = Mathf.Atan2(lastTouchPosition.y - firstTouchPosition.y, lastTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
+            Debug.Log(angle);
+            MovePieces();
+        }
+        
     }
 
     // Update is called once per frame
@@ -116,14 +120,21 @@ public class Dot : MonoBehaviour
 
             }
             else
-            { 
-                rowLast=row;
-                columnLast=column;
+            {
+                UpdateLastPosition();
                 board.DestroyMatch();
             }
                 otherDot = null;
         }
     }
+
+    public void UpdateLastPosition()
+    {
+        rowLast = row;
+        columnLast = column;
+    }
+    
+   
 
     void MovePieces()
     {
@@ -163,6 +174,8 @@ public class Dot : MonoBehaviour
         {
             GameObject leftDot1=board.allDots[column-1, row];
             GameObject rightDot1 = board.allDots[column + 1, row];
+            
+
             if (leftDot1 != null && rightDot1 != null && leftDot1 != this.gameObject && rightDot1 != this.gameObject)
             {
                 if (leftDot1.tag == this.gameObject.tag && rightDot1.tag == this.gameObject.tag)
