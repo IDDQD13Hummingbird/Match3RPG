@@ -3,7 +3,82 @@ using UnityEditor;
 
 [CustomPropertyDrawer(typeof(RPG_stats))]
 public class RPG_StatsPropertyDrawer : PropertyDrawer
-{
+{    private void CalculateEnemyStats(SerializedProperty levelProp, SerializedProperty maxHealthProp, 
+        SerializedProperty damageProp, SerializedProperty maxSpeedProp, 
+        SerializedProperty currentHealthProp, SerializedProperty currentSpeedProp)
+    {
+        if (levelProp == null || levelProp.intValue <= 0) return;
+        
+        int level = levelProp.intValue;
+        float health = level * 15f;
+        float damage = level * 5f;
+        int speed = level * 3;
+        
+        // Apply calculated values
+        if (maxHealthProp != null)
+            maxHealthProp.floatValue = health;
+        if (damageProp != null)
+            damageProp.floatValue = damage;
+        if (maxSpeedProp != null)
+            maxSpeedProp.intValue = speed;
+        
+        // Sync current values
+        if (currentHealthProp != null)
+            currentHealthProp.floatValue = health;
+        if (currentSpeedProp != null)
+            currentSpeedProp.intValue = speed;
+    }
+    
+    private void CalculateHeroStats(SerializedProperty levelProp, SerializedProperty heroTypeProp, SerializedProperty maxHealthProp, 
+        SerializedProperty damageProp, SerializedProperty maxSpeedProp, 
+        SerializedProperty currentHealthProp, SerializedProperty currentSpeedProp)
+    {
+        if (levelProp == null || levelProp.intValue <= 0 || heroTypeProp == null) return;
+        
+        int level = levelProp.intValue;
+        float health, damage;
+        int speed;        // Calculate stats based on hero type (enum order: 0=Necromancer, 1=Barbarian, 2=Poisoner, 3=Healer)
+        switch (heroTypeProp.enumValueIndex)
+        {
+            case 0: // Necromancer
+                health = level * 12f;
+                damage = level * 6f;
+                speed = level * 4;
+                break;
+            case 1: // Barbarian
+                health = level * 14f;
+                damage = level * 5f;
+                speed = level * 5;
+                break;
+            case 2: // Poisoner
+                health = level * 11f;
+                damage = level * 3f;
+                speed = level * 7;
+                break;
+            case 3: // Healer
+                health = level * 10f;
+                damage = level * 8f;
+                speed = level * 3;
+                break;
+            default:
+                return; // Unknown hero type
+        }
+        
+        // Apply calculated values
+        if (maxHealthProp != null)
+            maxHealthProp.floatValue = health;
+        if (damageProp != null)
+            damageProp.floatValue = damage;
+        if (maxSpeedProp != null)
+            maxSpeedProp.intValue = speed;
+        
+        // Sync current values
+        if (currentHealthProp != null)
+            currentHealthProp.floatValue = health;
+        if (currentSpeedProp != null)
+            currentSpeedProp.intValue = speed;
+    }
+    
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         EditorGUI.BeginProperty(position, label, property);
@@ -53,27 +128,18 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), levelProp);
                 if (EditorGUI.EndChangeCheck())
-                {
-                    // When level is set to a positive value, ensure character is alive
+                {                    // When level is set to a positive value, ensure character is alive
                     if (levelProp.intValue > 0 && aliveProp != null)
                         aliveProp.boolValue = true;
-                    
-                    // Check if team is Enemy and auto-calculate stats
+                      // Check if team is Enemy and auto-calculate stats
                     if (teamProp != null && teamProp.enumValueIndex == 1) // Enemy team
                     {
-                        // Calculate enemy stats directly using the level value
-                        int level = levelProp.intValue;
-                        float health = level * 15f;
-                        float damage = level * 5f;
-                        int speed = level * 3;
-                        
-                        // Apply calculated values
-                        if (maxHealthProp != null)
-                            maxHealthProp.floatValue = health;
-                        if (damageProp != null)
-                            damageProp.floatValue = damage;
-                        if (maxSpeedProp != null)
-                            maxSpeedProp.intValue = speed;
+                        CalculateEnemyStats(levelProp, maxHealthProp, damageProp, maxSpeedProp, currentHealthProp, currentSpeedProp);
+                    }
+                    // Check if team is Hero and auto-calculate stats
+                    else if (teamProp != null && teamProp.enumValueIndex == 0) // Hero team
+                    {
+                        CalculateHeroStats(levelProp, heroTypeProp, maxHealthProp, damageProp, maxSpeedProp, currentHealthProp, currentSpeedProp);
                     }
                     
                     // Sync current values with max values for all teams
@@ -138,40 +204,37 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
                     // When team is set, ensure character is alive
                     if (aliveProp != null)
                         aliveProp.boolValue = true;
-                    
-                    if (teamProp.enumValueIndex == 1) // Changed to Enemy
+                      if (teamProp.enumValueIndex == 1) // Changed to Enemy
                     {
                         // Auto-calculate enemy stats when team is changed to Enemy
                         if (levelProp != null && levelProp.intValue > 0)
                         {
-                            // Calculate enemy stats directly using the level value
-                            int level = levelProp.intValue;
-                            float health = level * 15f;
-                            float damage = level * 5f;
-                            int speed = level * 3;
-                            
-                            // Apply calculated values
-                            if (maxHealthProp != null)
-                                maxHealthProp.floatValue = health;
-                            if (damageProp != null)
-                                damageProp.floatValue = damage;
-                            if (maxSpeedProp != null)
-                                maxSpeedProp.intValue = speed;
-                            
-                            // Sync current values
-                            if (currentHealthProp != null)
-                                currentHealthProp.floatValue = health;
-                            if (currentSpeedProp != null)
-                                currentSpeedProp.intValue = speed;
+                            CalculateEnemyStats(levelProp, maxHealthProp, damageProp, maxSpeedProp, currentHealthProp, currentSpeedProp);
+                        }
+                    }
+                    else if (teamProp.enumValueIndex == 0) // Changed to Hero
+                    {
+                        // Auto-calculate hero stats when team is changed to Hero
+                        if (levelProp != null && levelProp.intValue > 0)
+                        {
+                            CalculateHeroStats(levelProp, heroTypeProp, maxHealthProp, damageProp, maxSpeedProp, currentHealthProp, currentSpeedProp);
                         }
                     }
                 }
                 yOffset += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                
-                // Only show heroType if team is Hero (enum value 0)
+                  // Only show heroType if team is Hero (enum value 0)
                 if (heroTypeProp != null && teamProp.enumValueIndex == 0)
                 {
+                    EditorGUI.BeginChangeCheck();
                     EditorGUI.PropertyField(new Rect(position.x, position.y + yOffset, position.width, EditorGUIUtility.singleLineHeight), heroTypeProp);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        // Auto-calculate hero stats when hero type is changed
+                        if (levelProp != null && levelProp.intValue > 0)
+                        {
+                            CalculateHeroStats(levelProp, heroTypeProp, maxHealthProp, damageProp, maxSpeedProp, currentHealthProp, currentSpeedProp);
+                        }
+                    }
                     yOffset += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
                 }
             }
