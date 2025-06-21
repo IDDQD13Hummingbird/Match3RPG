@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class Board : MonoBehaviour
 {
+    public static bool isRefilling = false;
     public int width;
     public int height;
     public GameObject TilePrefab;
@@ -15,49 +17,181 @@ public class Board : MonoBehaviour
     private int tileType = -1;
     
 
+    private float cellSize;
+    private float lastScreenWidth = -1f;
+    private float lastScreenHeight = -1f;
+    private int score;
+    [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private TMP_Text comboText;
+    private int comboCount = 0;
+    private bool comboChainActive = false; // True if a combo chain is in progress
+    private float comboTimer = 0f;
+    private float comboDisplayDuration;
+    private Vector3 comboTextBaseScale = Vector3.one;
+    private float comboTextBounceTime = 0f;
+    private float comboTextBounceDuration = 0.25f;
+    private float comboTextBounceScale = 1.25f;
+    private bool comboActive = false;
+
     void Start()
     {
+        AdjustBoardToScreenAndRebuild();
+        comboDisplayDuration = 1.5f;
+        if (comboText != null)
+        {
+            comboTextBaseScale = comboText.rectTransform.localScale;
+        }
+    }
+
+    void Update()
+    {
+        float screenWorldWidth = Camera.main.orthographicSize * 2f * Camera.main.aspect;
+        float screenWorldHeight = Camera.main.orthographicSize * 2f;
+        if (Mathf.Abs(screenWorldWidth - lastScreenWidth) > 0.01f || Mathf.Abs(screenWorldHeight - lastScreenHeight) > 0.01f)
+        {
+            AdjustBoardToScreenAndRebuild();
+        }
+
+        // Combo text timer logic
+        if (comboActive)
+        {
+            comboTimer -= Time.deltaTime;
+            if (comboTimer <= 0f)
+            {
+                comboActive = false;
+                if (comboText != null)
+                {
+                    Color c = comboText.color;
+                    c.a = 0f;
+                    comboText.color = c;
+                }
+            }
+        }
+        // Combo text bounce animation
+        if (comboText != null && comboTextBounceTime > 0f)
+        {
+            comboTextBounceTime -= Time.deltaTime;
+            float t = 1f - Mathf.Clamp01(comboTextBounceTime / comboTextBounceDuration);
+            // Ease out bounce
+            float scale = Mathf.Lerp(comboTextBounceScale, 1f, t) + Mathf.Sin(t * Mathf.PI) * 0.1f;
+            comboText.rectTransform.localScale = comboTextBaseScale * scale;
+            if (comboTextBounceTime <= 0f)
+            {
+                comboText.rectTransform.localScale = comboTextBaseScale;
+            }
+        }
+    }
+
+    private void AdjustBoardToScreenAndRebuild()
+    {
+        float screenWorldWidth = Camera.main.orthographicSize * 2f * Camera.main.aspect;
+        float screenWorldHeight = Camera.main.orthographicSize * 2f;
+        cellSize = Mathf.Min(screenWorldWidth / width, screenWorldHeight / height);
+        float boardWorldWidth = width * cellSize;
+        float boardWorldHeight = height * cellSize;
+        float scale = 1f;
+        if (boardWorldWidth > screenWorldWidth || boardWorldHeight > screenWorldHeight)
+        {
+            float scaleX = screenWorldWidth / boardWorldWidth;
+            float scaleY = screenWorldHeight / boardWorldHeight;
+            scale = Mathf.Min(scaleX, scaleY, 1f);
+        }
+        cellSize *= scale;
+        boardWorldWidth = width * cellSize;
+        boardWorldHeight = height * cellSize;
+        // Add a row's worth of cellSize as padding to the left and right
+        float horizontalPadding = cellSize * 1f; // 1 row's worth of padding on each side
+        float xOffset = -screenWorldWidth / 2f + horizontalPadding + (screenWorldWidth - boardWorldWidth - 2 * horizontalPadding) / 2f + cellSize / 2f;
+        float yOffset = -screenWorldHeight / 2f + (screenWorldHeight - boardWorldHeight) / 2f + cellSize / 2f;
+        Vector3 newPosition = transform.position;
+        newPosition.x = xOffset;
+        newPosition.y = yOffset;
+        transform.position = newPosition;
+        lastScreenWidth = screenWorldWidth;
+        lastScreenHeight = screenWorldHeight;
+
+        // Destroy old dots if any
+        if (allDots != null)
+        {
+            for (int i = 0; i < allDots.GetLength(0); i++)
+            {
+                for (int j = 0; j < allDots.GetLength(1); j++)
+                {
+                    if (allDots[i, j] != null)
+                    {
+                        Destroy(allDots[i, j]);
+                    }
+                }
+            }
+        }
         allTiles = new Tile[width, height];
         tileTypes = new int[width, height];
         allDots = new GameObject[width, height];
-        // Center the board horizontally so all dots fit within the screen width
-        float boardWorldWidth = width * 1f;
-        float screenWorldWidth = Camera.main.orthographicSize * 2f * Camera.main.aspect;
-        float xOffset = (screenWorldWidth - boardWorldWidth) / 2f;
-        Vector3 newPosition = transform.position;
-        newPosition.x = xOffset;
-        transform.position = newPosition;
-
-        CreateBoard();
+        CreateBoard(cellSize);
     }
+    
 
-    private void CreateBoard()
+    private void CreateBoard(float cellSize)
     {
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
-                Vector2 tempPosition =
-                    new Vector2(i + gameObject.transform.position.x, j + gameObject.transform.position.y);
+                Vector2 tempPosition = new Vector2(i * cellSize + gameObject.transform.position.x, j * cellSize + gameObject.transform.position.y);
                 GameObject tempTile = Instantiate(TilePrefab, tempPosition, Quaternion.identity);
                 tempTile.transform.parent = this.transform;
                 tempTile.name = "(" + i + ", " + j + ")";
                 int dotToUse = Random.Range(0, dots.Length);
-                int MaxIterations = 0;
-                while (HasGeneratedMatchOnCreation(i, j, dots[dotToUse]) && MaxIterations < 100)
+                int maxIterations = 0;
+                // Ensure no more than 2 in a row or column
+                while ((HasGeneratedMatchOnCreation(i, j, dots[dotToUse]) || CausesLongerMatch(i, j, dots[dotToUse])) && maxIterations < 100)
                 {
                     dotToUse = Random.Range(0, dots.Length);
-                    MaxIterations++;
+                    maxIterations++;
                 }
 
-                MaxIterations = 0;
                 GameObject dot = Instantiate(dots[dotToUse], tempPosition, Quaternion.identity);
                 dot.transform.parent = this.transform;
                 dot.name = "(" + i + ", " + j + ")";
+                Dot dotScript = dot.GetComponent<Dot>();
+                if (dotScript != null)
+                {
+                    dotScript.Init(i, j, cellSize, this);
+                }
                 allDots[i, j] = dot;
-                //add destroy existing matches upon creation
             }
         }
+    }
+
+    // Prevents more than 2 in a row/column (no 3+ at start)
+    private bool CausesLongerMatch(int column, int row, GameObject piece)
+    {
+        string tag = piece.tag;
+        // Check for more than 2 in a row horizontally
+        int count = 1;
+        for (int k = 1; k <= 2; k++)
+        {
+            int c = column - k;
+            if (c >= 0 && allDots[c, row] != null && allDots[c, row].tag == tag)
+                count++;
+            else
+                break;
+        }
+        if (count >= 3) return true;
+
+        // Check for more than 2 in a column vertically
+        count = 1;
+        for (int k = 1; k <= 2; k++)
+        {
+            int r = row - k;
+            if (r >= 0 && allDots[column, r] != null && allDots[column, r].tag == tag)
+                count++;
+            else
+                break;
+        }
+        if (count >= 3) return true;
+
+        return false;
     }
 
     private bool HasGeneratedMatchOnCreation(int column, int row, GameObject piece)
@@ -100,12 +234,61 @@ public class Board : MonoBehaviour
     {
         if (allDots[column, row].GetComponent<Dot>().isMatched)
         {
+            // Add score for each dot destroyed
+            score += 10;
+            if (scoreText != null)
+                scoreText.text = "Score: " + score;
             Destroy(allDots[column, row]);
             allDots[column, row] = null;
         }
     }
 
-    public void DestroyMatch()
+    // Call this when a user makes a manual match (swipe)
+    public void OnUserMatch()
+    {
+        comboCount = 1;
+        comboChainActive = true;
+        ShowComboText();
+    }
+
+    // Call this for every chain match (auto match from falling dots)
+    public void OnChainCombo()
+    {
+        if (!comboChainActive)
+        {
+            comboCount = 1;
+            comboChainActive = true;
+        }
+        else
+        {
+            comboCount++;
+        }
+        ShowComboText();
+    }
+
+    private void ShowComboText()
+    {
+        if (comboText != null && comboCount > 1)
+        {
+            Debug.Log($"COMBO x{comboCount}!");
+            comboText.text = $"COMBO x{comboCount}";
+            Color c = comboText.color;
+            c.a = 1f;
+            comboText.color = c;
+            comboActive = true;
+            comboTimer = comboDisplayDuration;
+            // Bounce effect
+            comboTextBounceTime = comboTextBounceDuration;
+        }
+        else if (comboText != null)
+        {
+            Color c = comboText.color;
+            c.a = 0f;
+            comboText.color = c;
+        }
+    }
+
+    public void DestroyMatch(bool isChainCombo = false)
     {
         for (int i = 0; i < width; i++)
         {
@@ -118,6 +301,10 @@ public class Board : MonoBehaviour
             }
         }
 
+        if (isChainCombo)
+        {
+            OnChainCombo();
+        }
         StartCoroutine(ClashRowsCo());
     }
 
@@ -142,7 +329,7 @@ public class Board : MonoBehaviour
             emptySpaceCount = 0;
         }
 
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(.01f);
         StartCoroutine(FillBoardCo());
 
     }
@@ -169,44 +356,106 @@ public class Board : MonoBehaviour
 
     private void RefillBoard()
     {
+        // Use the board's cellSize field directly
+        float fallStartYOffset = 4f; // How high above the board new dots spawn
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
                 if (allDots[i, j] == null)
                 {
-                    Vector2 tempPosition = new Vector2(i + gameObject.transform.position.x,
-                        j + gameObject.transform.position.y);
+                    Vector2 spawnPosition = new Vector2(i * cellSize + gameObject.transform.position.x, (j + fallStartYOffset) * cellSize + gameObject.transform.position.y);
                     int dotToUse = Random.Range(0, dots.Length);
-                    GameObject piece = Instantiate(dots[dotToUse], tempPosition, Quaternion.identity);
+                    GameObject piece = Instantiate(dots[dotToUse], spawnPosition, Quaternion.identity);
                     piece.transform.parent = this.transform;
+                    Dot dotScript = piece.GetComponent<Dot>();
+                    if (dotScript != null)
+                    {
+                        dotScript.Init(i, j, cellSize, this);
+                        dotScript.StartFalling(j * cellSize + gameObject.transform.position.y);
+                    }
                     allDots[i, j] = piece;
-
-
                 }
             }
         }
-
     }
 
 
     private IEnumerator FillBoardCo()
     {
+        isRefilling = true;
         RefillBoard();
-        yield return new WaitForSeconds(.3f);
+        // Wait for all falling dots to finish
+        bool anyFalling;
+        do
+        {
+            anyFalling = false;
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (allDots[i, j] != null)
+                    {
+                        Dot dot = allDots[i, j].GetComponent<Dot>();
+                        if (dot != null && dot.isFalling)
+                        {
+                            anyFalling = true;
+                        }
+                    }
+                }
+            }
+            if (anyFalling)
+                yield return null;
+        } while (anyFalling);
+
+        yield return new WaitForSeconds(.1f);
+        bool firstMatch = true;
+        bool userInputMatch = false;
         while (CheckForExistingMatches())
         {
             yield return new WaitForSeconds(.3f);
-            DestroyMatch();
+            DestroyMatch(!firstMatch ? true : false);
+            if (firstMatch && !userInputMatch)
+            {
+                OnChainCombo(); // Trigger combo for first auto-match after refill
+            }
+            if (firstMatch) userInputMatch = true;
+            firstMatch = false;
+            // Wait for new falls
+            do
+            {
+                anyFalling = false;
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        if (allDots[i, j] != null)
+                        {
+                            Dot dot = allDots[i, j].GetComponent<Dot>();
+                            if (dot != null && dot.isFalling)
+                            {
+                                anyFalling = true;
+                            }
+                        }
+                    }
+                }
+                if (anyFalling)
+                    yield return null;
+            } while (anyFalling);
         }
 
-
-        for (int i = 0; i< allDots.GetLength(0); i++)
+        for (int i = 0; i < allDots.GetLength(0); i++)
         {
             for (int j = 0; j < allDots.GetLength(1); j++)
             {
-                allDots[i, j].GetComponent<Dot>().UpdateLastPosition();
+                if (allDots[i, j] != null)
+                {
+                    allDots[i, j].GetComponent<Dot>().UpdateLastPosition();
+                }
             }
         }
+        isRefilling = false;
+        // Combo chain ends only on new user input, not after refill
+        // (Do not reset comboCount here)
     }
 }

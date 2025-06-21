@@ -78,8 +78,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 94259295ee5add8408245dc9a0fd4a55, type: 3}
-  m_Color: {r: 0.5686275, g: 0.9960785, b: 0.4156863, a: 1}
+  m_Sprite: {fileID: 21300000, guid: a381726510c1dca479254338e1a6af6e, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -139,7 +139,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   column: 0
   row: 0
+  columnLast: 0
+  rowLast: 0
   x: 0
   y: 0
   isMatched: 0
   angle: 0
+  swipeResist: 0.1
+  dotScaleOverride: 0.65
