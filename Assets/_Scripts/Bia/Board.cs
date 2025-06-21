@@ -20,6 +20,14 @@ public class Board : MonoBehaviour
         allTiles = new Tile[width, height];
         tileTypes = new int[width, height];
         allDots = new GameObject[width, height];
+        // Center the board horizontally so all dots fit within the screen width
+        float boardWorldWidth = width * 1f;
+        float screenWorldWidth = Camera.main.orthographicSize * 2f * Camera.main.aspect;
+        float xOffset = (screenWorldWidth - boardWorldWidth) / 2f;
+        Vector3 newPosition = transform.position;
+        newPosition.x = xOffset;
+        transform.position = newPosition;
+
         CreateBoard();
     }
 

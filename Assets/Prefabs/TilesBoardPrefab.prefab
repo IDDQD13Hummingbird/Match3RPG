@@ -52,3 +52,9 @@ MonoBehaviour:
   - {fileID: 5125784924630364686, guid: 0f5c5e237ee51c742b51518a95a121e1, type: 3}
   - {fileID: 4538502500988803579, guid: d76da151be0d0de4491217588dc60f8c, type: 3}
   - {fileID: 6718822153558003681, guid: 25eade1885eefa54e931a6de977ddf1d, type: 3}
+  dots:
+  - {fileID: 1726687106530577309, guid: 5ae07cdd3909c324eaea3402c936e60d, type: 3}
+  - {fileID: 5125784924630364686, guid: 0f5c5e237ee51c742b51518a95a121e1, type: 3}
+  - {fileID: 4538502500988803579, guid: d76da151be0d0de4491217588dc60f8c, type: 3}
+  - {fileID: 6718822153558003681, guid: 25eade1885eefa54e931a6de977ddf1d, type: 3}
+  icons: []
