@@ -8,9 +8,9 @@ public enum Team
 
 public enum Hero
 {
-    Wizard,
+    Necromancer,
     Barbarian,
-    Rogue,
+    Poisoner,
     Healer
 }
 

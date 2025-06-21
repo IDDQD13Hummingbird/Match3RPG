@@ -37,10 +37,10 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
         
         int level = levelProp.intValue;
         float health, damage;
-        int speed;        // Calculate stats based on hero type (enum order: 0=Wizard, 1=Barbarian, 2=Rogue, 3=Healer)
+        int speed;        // Calculate stats based on hero type (enum order: 0=Necromancer, 1=Barbarian, 2=Poisoner, 3=Healer)
         switch (heroTypeProp.enumValueIndex)
         {
-            case 0: // Wizard
+            case 0: // Necromancer
                 health = level * 12f;
                 damage = level * 6f;
                 speed = level * 4;
@@ -50,7 +50,7 @@ public class RPG_StatsPropertyDrawer : PropertyDrawer
                 damage = level * 5f;
                 speed = level * 5;
                 break;
-            case 2: // Rogue
+            case 2: // Poisoner
                 health = level * 11f;
                 damage = level * 3f;
                 speed = level * 7;
