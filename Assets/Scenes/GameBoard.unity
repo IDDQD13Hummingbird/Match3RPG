@@ -855,7 +855,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6477192276771106107, guid: bcceeb1c1db7ea64a9b9ae3e69998e60, type: 3}
       propertyPath: height
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6477192276771106107, guid: bcceeb1c1db7ea64a9b9ae3e69998e60, type: 3}
       propertyPath: comboText
