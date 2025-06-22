@@ -33,6 +33,9 @@ public class Board : MonoBehaviour
     private float comboTextBounceScale = 1.25f;
     private bool comboActive = false;
 
+    //PARTICLES//
+    public ParticleManager particle;
+
     void Start()
     {
         AdjustBoardToScreenAndRebuild();
@@ -41,6 +44,7 @@ public class Board : MonoBehaviour
         {
             comboTextBaseScale = comboText.rectTransform.localScale;
         }
+        particle = GameObject.Find("ParticleManager").GetComponent<ParticleManager>(); //Particle manager needs to be in the scene
     }
 
     void Update()
@@ -234,6 +238,8 @@ public class Board : MonoBehaviour
     {
         if (allDots[column, row].GetComponent<Dot>().isMatched)
         {
+            SpawnEffect(column + gameObject.transform.position.x,row + gameObject.transform.position.y); //vfx
+
             // Add score for each dot destroyed
             score += 10;
             if (scoreText != null)
@@ -457,5 +463,14 @@ public class Board : MonoBehaviour
         isRefilling = false;
         // Combo chain ends only on new user input, not after refill
         // (Do not reset comboCount here)
+    }
+
+    /*Effects*/
+    void SpawnEffect(float x, float y)
+    {
+        //spawn particles effect 
+        particle.pool[0].transform.position = new Vector3(x, y, -1);
+        particle.pool[0].GetComponent<ParticleSystem>().Emit(1);
+        //
     }
 }

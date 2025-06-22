@@ -34,11 +34,12 @@ public class Dot : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private float cellSize = 1f;
 
+  
 
     private void Start()
     {
         fallSpeed = 10f; // Reset fall speed
-
+        
     }
 
     // Call this to start a fall to a target Y position
@@ -166,6 +167,8 @@ public class Dot : MonoBehaviour
         {
             SpriteRenderer newSprite = GetComponent<SpriteRenderer>();
             newSprite.color = Color.grey;
+            
+
         }
 
         x = column;
