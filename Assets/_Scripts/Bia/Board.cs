@@ -14,8 +14,8 @@ public class Board : MonoBehaviour
     private Tile[,] allTiles;
     private int[,] tileTypes; // Track what icon type each tile has
     public GameObject[] dots;
-    public GameObject[] icons;
-    private int tileType = -1;
+   
+    
     
 
     private float cellSize;

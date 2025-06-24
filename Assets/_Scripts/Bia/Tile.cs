@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public GameObject[] icons;
-    private int tileType = -1;
+   
 
     void Start()
     {
