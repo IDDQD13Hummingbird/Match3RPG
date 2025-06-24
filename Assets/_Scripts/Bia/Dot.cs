@@ -3,6 +3,9 @@ using System.Collections;
 
 public class Dot : MonoBehaviour
 {
+    [Header("Dot Color/Type")]
+    public string colorName;
+
     // Falling animation support
     public bool isFalling = false;
     private float fallTargetY = 0f;

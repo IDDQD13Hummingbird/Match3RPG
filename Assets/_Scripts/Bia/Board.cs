@@ -25,17 +25,38 @@ public class Board : MonoBehaviour
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text comboText;
     private int comboCount = 0;
-    private bool comboChainActive = false; // True if a combo chain is in progress
-    private float comboTimer = 0f;
-    private float comboDisplayDuration;
-    private Vector3 comboTextBaseScale = Vector3.one;
-    private float comboTextBounceTime = 0f;
-    private float comboTextBounceDuration = 0.25f;
-    private float comboTextBounceScale = 1.25f;
-    private bool comboActive = false;
+private bool comboChainActive = false; // True if a combo chain is in progress
+private float comboTimer = 0f;
+private float comboDisplayDuration;
+private Vector3 comboTextBaseScale = Vector3.one;
+private float comboTextBounceTime = 0f;
+private float comboTextBounceDuration = 0.25f;
+private float comboTextBounceScale = 1.25f;
+private bool comboActive = false;
 
-    //PARTICLES//
-    public ParticleManager particle;
+// PARTICLES //
+public ParticleManager particle;
+
+// Store the latest match info for external access
+public latestMatchInfo lastMatch;
+
+[System.Serializable]
+public struct latestMatchInfo
+{
+    public string color; // e.g. "Red", "Blue", etc.
+    public int count;    // Number of dots destroyed in a match
+
+    public latestMatchInfo(string color, int count)
+    {
+        this.color = color;
+        this.count = count;
+    }
+
+    public override string ToString()
+    {
+        return $"{color} x{count}";
+    }
+}
 
     void Start()
     {
@@ -137,7 +158,7 @@ public class Board : MonoBehaviour
         allDots = new GameObject[width, height];
         CreateBoard(cellSize);
     }
-    
+
 
     private void CreateBoard(float cellSize)
     {
@@ -240,18 +261,53 @@ public class Board : MonoBehaviour
 
     private void DestroyMatchAt(int column, int row)
     {
-        if (allDots[column, row].GetComponent<Dot>().isMatched)
+        // Count how many connected dots of the same color are matched (flood fill)
+        if (allDots[column, row] != null && allDots[column, row].GetComponent<Dot>().isMatched)
         {
-            SpawnEffect(column + gameObject.transform.position.x,row + gameObject.transform.position.y); //vfx
+            Dot dotScript = allDots[column, row].GetComponent<Dot>();
+            string colorTag = dotScript != null ? dotScript.colorName : "Unknown";
+            int matchCount = CountAndDestroyConnectedMatches(column, row, colorTag);
+            SpawnEffect(column + gameObject.transform.position.x, row + gameObject.transform.position.y); //vfx
 
             // Add score for each dot destroyed
-            score += 10;
+            score += 10 * matchCount;
             if (scoreText != null)
                 scoreText.text = "Score: " + score;
-            Destroy(allDots[column, row]);
-            allDots[column, row] = null;
+
+            lastMatch = new latestMatchInfo(colorTag, matchCount);
+            BattleManager battleManager = FindFirstObjectByType<BattleManager>();
+            
+            battleManager.MatchHappend(lastMatch.color, lastMatch.count);
+            
+
         }
+
     }
+
+
+    public int CountAndDestroyConnectedMatches(int column, int row, string colorTag)
+    {
+        if (column < 0 || column >= width || row < 0 || row >= height)
+            return 0;
+        if (allDots[column, row] == null)
+            return 0;
+        Dot dotScript = allDots[column, row].GetComponent<Dot>();
+        if (dotScript == null || !dotScript.isMatched || dotScript.colorName != colorTag)
+            return 0;
+
+        // Destroy this dot
+        Destroy(allDots[column, row]);
+        allDots[column, row] = null;
+        int count = 1;
+
+        // Check 4 directions
+        count += CountAndDestroyConnectedMatches(column + 1, row, colorTag);
+        count += CountAndDestroyConnectedMatches(column - 1, row, colorTag);
+        count += CountAndDestroyConnectedMatches(column, row + 1, colorTag);
+        count += CountAndDestroyConnectedMatches(column, row - 1, colorTag);
+        return count;
+    }
+    
 
     // Call this when a user makes a manual match (swipe)
     public void OnUserMatch()
@@ -263,6 +319,7 @@ public class Board : MonoBehaviour
         BattleManager battleManager = FindFirstObjectByType<BattleManager>();
 
         battleManager.NextTurn();
+
     }
 
     // Call this for every chain match (auto match from falling dots)
@@ -284,7 +341,6 @@ public class Board : MonoBehaviour
     {
         if (comboText != null && comboCount > 1)
         {
-            Debug.Log($"COMBO x{comboCount}!");
             comboText.text = $"COMBO x{comboCount}";
             Color c = comboText.color;
             c.a = 1f;

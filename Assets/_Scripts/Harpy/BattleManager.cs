@@ -22,8 +22,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Image[] heroPortraits;                         // 0 = the first hero in the iniative order, 1 = the second hero, etc.
     [SerializeField] private Image villainPortrait;                         // The villain portrait, if applicable
     private Vector3 initialPortraitSize = Vector3.one;                      // Store the initial size of the hero portraits
-    private Vector3 initialVillainPortraitSize = new Vector3(-1,1,1);
-    private RPG_stats currentUnit;                                          //who's turn is it?
+    private Vector3 initialVillainPortraitSize = new Vector3(-1, 1, 1);
+    private RPG_stats currentUnit;
+    private Board board;
 
 
 
@@ -31,11 +32,18 @@ public class BattleManager : MonoBehaviour
     {
         // Initialize heroPositions to avoid null reference in Update
         HandleNewRound(characterList.units);
+
+        board = FindFirstObjectByType<Board>();
     }
 
     private void Update()
     {
         IncreasePortraitSizeIfTheirTurn();
+
+        if (board == null)
+        {
+            board = FindFirstObjectByType<Board>();
+        }
     }
 
 
@@ -139,10 +147,6 @@ public class BattleManager : MonoBehaviour
             int villainIndex = villains.IndexOf(currentUnit) + 1;
             whosTurnIsItText.text = $"It's Villain #{villainIndex}’s turn!";
         }
-
-       
-
-        Debug.Log($"Current turn order: {string.Join(", ", currentTurnOrder.Select(unit => unit.characterName))}");
     }
 
 
@@ -179,5 +183,11 @@ public class BattleManager : MonoBehaviour
                 portrait.transform.localScale = initialPortraitSize;
             }
         }
+    }
+
+    public void MatchHappend(string color, int count) //called by the Board.cs script
+    {
+        Debug.Log($"Match happened: {color} x{count}");
+
     }
 }

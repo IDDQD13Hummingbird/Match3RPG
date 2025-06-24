@@ -137,6 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8f632d25dc95447b0228e6a4e6f2c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colorName: Yellow
   isFalling: 0
   column: 0
   row: 0
