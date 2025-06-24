@@ -17,13 +17,13 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text EnemiesLeftText;
     [SerializeField] private TMP_Text whosTurnIsItText;
 
-    private List<RPG_stats> currentTurnOrder = new List<RPG_stats>();     // List to track the current turn order (updated every turn)
+    private List<RPG_stats> currentTurnOrder = new List<RPG_stats>();       // List to track the current turn order (updated every turn)
 
-    [SerializeField] private Image[] heroPortraits; // 0 = the first hero in the iniative order, 1 = the second hero, etc.
-    [SerializeField] private Image villainPortrait; // The villain portrait, if applicable
-    private Vector3 initialPortraitSize = Vector3.one; // Store the initial size of the hero portraits
+    [SerializeField] private Image[] heroPortraits;                         // 0 = the first hero in the iniative order, 1 = the second hero, etc.
+    [SerializeField] private Image villainPortrait;                         // The villain portrait, if applicable
+    private Vector3 initialPortraitSize = Vector3.one;                      // Store the initial size of the hero portraits
     private Vector3 initialVillainPortraitSize = new Vector3(-1,1,1);
-    private RPG_stats currentUnit;     //who's turn is it?
+    private RPG_stats currentUnit;                                          //who's turn is it?
 
 
 
@@ -44,7 +44,7 @@ public class BattleManager : MonoBehaviour
         // Calculate initiative order for the round
         currentTurnOrder = allUnits
             .Where(unit => unit != null && unit.alive)
-            .OrderByDescending(unit => unit.maxSpeed)                           // Primary: speed
+            .OrderByDescending(unit => unit.maxSpeed)                        // Primary: speed
             .ThenByDescending(unit => unit.team == Team.Enemy ? 1 : 0)       // Tiebreaker 1: enemies before heroes
             .ThenBy(unit => unit.team == Team.Enemy ? Random.value : 0f)     // Tiebreaker 2: randomize same-speed enemies
             .ToList();
