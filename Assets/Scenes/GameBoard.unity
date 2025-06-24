@@ -479,6 +479,91 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1078608160
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1078608162}
+  - component: {fileID: 1078608161}
+  m_Layer: 0
+  m_Name: Character
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1078608161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078608160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce4a7e73058a564682cf0257476ec79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  units:
+  - characterName: Poppy
+    maxHealth: 11
+    damage: 3
+    maxSpeed: 7
+    level: 1
+    team: 0
+    heroType: 2
+    alive: 1
+    currentHealth: 11
+    currentSpeed: 7
+  - characterName: Barbie
+    maxHealth: 14
+    damage: 5
+    maxSpeed: 5
+    level: 1
+    team: 0
+    heroType: 1
+    alive: 1
+    currentHealth: 14
+    currentSpeed: 5
+  - characterName: Helly
+    maxHealth: 10
+    damage: 8
+    maxSpeed: 3
+    level: 1
+    team: 0
+    heroType: 3
+    alive: 1
+    currentHealth: 10
+    currentSpeed: 3
+  - characterName: Necole
+    maxHealth: 12
+    damage: 6
+    maxSpeed: 4
+    level: 1
+    team: 0
+    heroType: 0
+    alive: 1
+    currentHealth: 12
+    currentSpeed: 4
+--- !u!4 &1078608162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078608160}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.79317, y: 8.65111, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1085208987
 GameObject:
   m_ObjectHideFlags: 0
@@ -965,6 +1050,65 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bcceeb1c1db7ea64a9b9ae3e69998e60, type: 3}
+--- !u!1 &1486618914
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1486618916}
+  - component: {fileID: 1486618915}
+  m_Layer: 0
+  m_Name: BattleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1486618915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486618914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25fdcda499595b14f9b5e86370713732, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterList: {fileID: 0}
+  YouWinLoseScreen: {fileID: 0}
+  YouWinLoseText: {fileID: 0}
+  EnemiesLeftText: {fileID: 0}
+  whosTurnIsItText: {fileID: 0}
+  firstPlaceHeroDesiredPosition: {x: -195, y: 341}
+  secondPlaceHeroDesiredPosition: {x: -5, y: 0}
+  thirdPlaceHeroDesiredPosition: {x: 148, y: 0}
+  fourthPlaceHeroDesiredPosition: {x: -290, y: 0}
+  heroesInUI:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  heroUIMoveSpeed: 190
+--- !u!4 &1486618916
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486618914}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 889.0562, y: 857.99567, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2135370866
 GameObject:
   m_ObjectHideFlags: 0
@@ -1074,4 +1218,6 @@ SceneRoots:
   - {fileID: 1446633357}
   - {fileID: 716363988}
   - {fileID: 1017750560}
+  - {fileID: 1486618916}
   - {fileID: 937735033}
+  - {fileID: 1078608162}

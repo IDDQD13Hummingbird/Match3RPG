@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using Random = UnityEngine.Random;
 
 public class Board : MonoBehaviour
 {

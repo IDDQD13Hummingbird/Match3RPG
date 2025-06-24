@@ -1,16 +1,21 @@
 using UnityEngine;
 
-public class LevelSelection : MonoBehaviour
+public class LevelSelection : LazyMonoSingleton<LevelSelection>
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int SelectedLevel { get; private set; } = 1;
+
+    private void Awake()
     {
-        
+        DontDestroyOnLoad(gameObject);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetSelectedLevel(int level)
     {
-        
+        if (level < 1)
+        {
+            Debug.LogWarning("Level number must be 1 or higher.");
+            return;
+        }
+        SelectedLevel = level;
     }
 }
