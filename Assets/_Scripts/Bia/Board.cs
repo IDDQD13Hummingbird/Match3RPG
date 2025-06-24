@@ -8,6 +8,7 @@ public class Board : MonoBehaviour
     public static bool isRefilling = false;
     public int width;
     public int height;
+    [SerializeField] private float boardHeight = 10f; // New serialized field for board height
     public GameObject TilePrefab;
     public GameObject[] possibleIcons; // Add this - assign the same icons array here
     public GameObject[,] allDots;
@@ -16,7 +17,6 @@ public class Board : MonoBehaviour
     public GameObject[] dots;
     public GameObject[] icons;
     private int tileType = -1;
-    
 
     private float cellSize;
     private float lastScreenWidth = -1f;
@@ -91,14 +91,16 @@ public class Board : MonoBehaviour
     {
         float screenWorldWidth = Camera.main.orthographicSize * 2f * Camera.main.aspect;
         float screenWorldHeight = Camera.main.orthographicSize * 2f;
-        cellSize = Mathf.Min(screenWorldWidth / width, screenWorldHeight / height);
+        // Use boardHeight for vertical size, but clamp to screen height
+        float usedBoardHeight = Mathf.Min(boardHeight, screenWorldHeight);
+        cellSize = Mathf.Min(screenWorldWidth / width, usedBoardHeight / height);
         float boardWorldWidth = width * cellSize;
         float boardWorldHeight = height * cellSize;
         float scale = 1f;
-        if (boardWorldWidth > screenWorldWidth || boardWorldHeight > screenWorldHeight)
+        if (boardWorldWidth > screenWorldWidth || boardWorldHeight > usedBoardHeight)
         {
             float scaleX = screenWorldWidth / boardWorldWidth;
-            float scaleY = screenWorldHeight / boardWorldHeight;
+            float scaleY = usedBoardHeight / boardWorldHeight;
             scale = Mathf.Min(scaleX, scaleY, 1f);
         }
         cellSize *= scale;
@@ -107,7 +109,8 @@ public class Board : MonoBehaviour
         // Add a row's worth of cellSize as padding to the left and right
         float horizontalPadding = cellSize * 1f; // 1 row's worth of padding on each side
         float xOffset = -screenWorldWidth / 2f + horizontalPadding + (screenWorldWidth - boardWorldWidth - 2 * horizontalPadding) / 2f + cellSize / 2f;
-        float yOffset = -screenWorldHeight / 2f + (screenWorldHeight - boardWorldHeight) / 2f + cellSize / 2f;
+        // Center board vertically within usedBoardHeight
+        float yOffset = -screenWorldHeight / 2f + (screenWorldHeight - usedBoardHeight) / 2f + cellSize / 2f;
         Vector3 newPosition = transform.position;
         newPosition.x = xOffset;
         newPosition.y = yOffset;
@@ -256,6 +259,10 @@ public class Board : MonoBehaviour
         comboCount = 1;
         comboChainActive = true;
         ShowComboText();
+
+        BattleManager battleManager = FindFirstObjectByType<BattleManager>();
+
+        battleManager.NextTurn();
     }
 
     // Call this for every chain match (auto match from falling dots)

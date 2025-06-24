@@ -1,9 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Serialization;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 
 public class BattleManager : MonoBehaviour
 {
@@ -16,29 +17,25 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text EnemiesLeftText;
     [SerializeField] private TMP_Text whosTurnIsItText;
 
-    [Header("Hero Sprites")]    //index 0 is Necromancer, 1 is Barbarian, 2 is Poisoner, 3 is Healer
-    [FormerlySerializedAs("firstPlaceHero")] [SerializeField] private Vector2 firstPlaceHeroDesiredPosition;
-    [FormerlySerializedAs("secondPlaceHero")] [SerializeField] private Vector2 secondPlaceHeroDesiredPosition;
-    [FormerlySerializedAs("thirdPlaceHero")] [SerializeField] private Vector2 thirdPlaceHeroDesiredPosition;
-    [FormerlySerializedAs("fourthPlaceHero")] [SerializeField] private Vector2 fourthPlaceHeroDesiredPosition;
-    [SerializeField] private RectTransform[] heroesInUI; // UI elements for each hero, index matches hero type
+    private List<RPG_stats> currentTurnOrder = new List<RPG_stats>();     // List to track the current turn order (updated every turn)
 
-    private Vector2[] heroPositions;
-
-    // List to track the current turn order (updated every turn)
-    private List<RPG_stats> currentTurnOrder = new List<RPG_stats>();
-
-    //who's turn is it?
-    private RPG_stats currentUnit;
-    [Range(100f,300f)] [SerializeField] private float heroUIMoveSpeed = 190f; // Speed at which hero UI slots move to their desired positions
+    [SerializeField] private Image[] heroPortraits; // 0 = the first hero in the iniative order, 1 = the second hero, etc.
+    [SerializeField] private Image villainPortrait; // The villain portrait, if applicable
+    private Vector3 initialPortraitSize = Vector3.one; // Store the initial size of the hero portraits
+    private Vector3 initialVillainPortraitSize = new Vector3(-1,1,1);
+    private RPG_stats currentUnit;     //who's turn is it?
 
 
 
     private void Start()
     {
         // Initialize heroPositions to avoid null reference in Update
-        heroPositions = new Vector2[] { firstPlaceHeroDesiredPosition, secondPlaceHeroDesiredPosition, thirdPlaceHeroDesiredPosition, fourthPlaceHeroDesiredPosition };
         HandleNewRound(characterList.units);
+    }
+
+    private void Update()
+    {
+        IncreasePortraitSizeIfTheirTurn();
     }
 
 
@@ -85,6 +82,8 @@ public class BattleManager : MonoBehaviour
 
         currentUnit = currentTurnOrder[0];
         NextTurn();
+
+
     }
 
     public void NextTurn()
@@ -141,66 +140,44 @@ public class BattleManager : MonoBehaviour
             whosTurnIsItText.text = $"It's Villain #{villainIndex}’s turn!";
         }
 
-        // Only update hero UI positions if it's a hero's turn
-        if (currentUnit.team == Team.Hero)
-        {
-            UpdateHeroPositions();
-        }
+       
 
         Debug.Log($"Current turn order: {string.Join(", ", currentTurnOrder.Select(unit => unit.characterName))}");
     }
-    
-    private void UpdateHeroPositions()
+
+
+
+
+    private void IncreasePortraitSizeIfTheirTurn()
     {
-        // Always put the current hero (if hero) in the first slot visually, then the rest in order
-        heroPositions = new Vector2[] { firstPlaceHeroDesiredPosition, secondPlaceHeroDesiredPosition, thirdPlaceHeroDesiredPosition, fourthPlaceHeroDesiredPosition };
-
-        // Get all alive heroes in currentTurnOrder
-        var allHeroes = currentTurnOrder
-            .Where(unit => unit != null && unit.team == Team.Hero && unit.alive)
-            .ToList();
-
-        // Build the hero queue: currentUnit (if hero) first, then the rest in order
-        List<RPG_stats> heroQueue = new List<RPG_stats>();
-        if (currentUnit != null && currentUnit.team == Team.Hero && allHeroes.Contains(currentUnit))
+        if (currentUnit != null && currentUnit.team == Team.Hero)
         {
-            heroQueue.Add(currentUnit);
-            heroQueue.AddRange(allHeroes.Where(h => h != currentUnit));
+            int heroIndex = (int)currentUnit.heroType;
+
+            villainPortrait.transform.localScale = initialVillainPortraitSize;
+
+            if (heroIndex >= 0 && heroIndex < heroPortraits.Length && heroPortraits[heroIndex] != null)
+            {
+                foreach (var portrait in heroPortraits)
+                {
+                    portrait.transform.localScale = initialPortraitSize;
+                }
+
+                heroPortraits[heroIndex].transform.localScale = initialPortraitSize * 1.4f; // Increase size
+            }
+            else
+            {
+                heroPortraits[heroIndex].transform.localScale = initialPortraitSize; // Reset size
+            }
         }
         else
         {
-            heroQueue = allHeroes;
-        }
-
-        // Move each hero UI slot to the correct desired position based on the hero's place in the queue
-        for (int i = 0; i < heroQueue.Count && i < heroPositions.Length; i++)
-        {
-            int heroTypeIndex = (int)heroQueue[i].heroType;
-            if (heroesInUI != null && heroTypeIndex >= 0 && heroTypeIndex < heroesInUI.Length && heroesInUI[heroTypeIndex] != null)
+            villainPortrait.transform.localScale = initialVillainPortraitSize * 1.4f; // Increase villain portrait size
+            // Reset all portraits if it's not a hero's turn
+            foreach (var portrait in heroPortraits)
             {
-                // Set pivot to center to ensure consistent positioning
-                heroesInUI[heroTypeIndex].pivot = new Vector2(0.5f, 0.5f);
-                heroesInUI[heroTypeIndex].localPosition = Vector2.MoveTowards(
-                    heroesInUI[heroTypeIndex].localPosition,
-                    heroPositions[i],
-                    Time.deltaTime * heroUIMoveSpeed
-                );
+                portrait.transform.localScale = initialPortraitSize;
             }
         }
-    }
-
-    private void Update()
-    {
-        // Null checks
-        if (characterList == null || heroesInUI == null || heroesInUI.Length == 0 || heroPositions == null)
-        {
-            // Only log once if heroPositions is null
-            if (heroPositions == null)
-                Debug.LogWarning("heroPositions is not initialized.");
-            return;
-        }
-
-        // Always update hero positions every frame for smooth movement
-        UpdateHeroPositions();
     }
 }
