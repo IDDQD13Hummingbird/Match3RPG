@@ -5,12 +5,10 @@ using System.Collections;
 public class DisplayAndUpdate : MonoBehaviour
 {
     private HeroesAccessor accessorHero;
-    public   TMP_Text levelUI;
     public   TMP_Text characterNameUI;
-    public   TMP_Text damageUI;
-    public   TMP_Text heroTypeUI; 
-    public   TMP_Text currentHealthUI; 
-    public   TMP_Text currentSpeedUI; 
+    public   TMP_Text heroTypeAndLevelUI; 
+    public   TMP_Text statsUI; 
+    
     //input
     public int heroNumber;
 
@@ -23,17 +21,34 @@ public class DisplayAndUpdate : MonoBehaviour
 
     public void DisplayStats(int heroNumber)
     {
-        levelUI.text= "" + accessorHero.heroes[heroNumber].level;
         characterNameUI.text = "" + accessorHero.heroes[heroNumber].characterName;
-        damageUI.text = "" + accessorHero.heroes[heroNumber].damage;
-        heroTypeUI.text = "" + accessorHero.heroes[heroNumber].heroType;
-        currentHealthUI.text = "" + accessorHero.heroes[heroNumber].currentHealth;
-        currentSpeedUI.text = "" + accessorHero.heroes[heroNumber].currentSpeed;
+        heroTypeAndLevelUI.text = "" + accessorHero.heroes[heroNumber].heroType + " Lvl " + accessorHero.heroes[heroNumber].level;
+        statsUI.text = "Health: " + accessorHero.heroes[heroNumber].currentHealth + "\nSpeed:  " + accessorHero.heroes[heroNumber].currentSpeed + "\nAttack: " + accessorHero.heroes[heroNumber].damage;
+    }
+
+    bool StatsHaveChanged()
+    {
+        return false;
+    }
+
+    public void UpgradeLevel()
+    {
+        //call this on click button
+        accessorHero.heroes[heroNumber].UpgradeLevel();
+        DisplayStats(heroNumber);
+    }
+
+    void UpdateStats()
+    {
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (StatsHaveChanged())
+        {
+            //update stats func;
+        }
     }
 }

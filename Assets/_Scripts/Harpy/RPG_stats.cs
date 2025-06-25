@@ -28,4 +28,10 @@ public class RPG_stats
     public bool alive = true; // True - alive, False - dead
     public float currentHealth; // Current health of the target
     public int currentSpeed; // Current initiative of the target
+
+    public void UpgradeLevel()
+    {
+        level++;
+    }
 }
+
