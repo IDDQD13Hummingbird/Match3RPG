@@ -26,11 +26,6 @@ public class DisplayAndUpdate : MonoBehaviour
         statsUI.text = "Health: " + accessorHero.heroes[heroNumber].currentHealth + "\nSpeed:  " + accessorHero.heroes[heroNumber].currentSpeed + "\nAttack: " + accessorHero.heroes[heroNumber].damage;
     }
 
-    bool StatsHaveChanged()
-    {
-        return false;
-    }
-
     public void UpgradeLevel()
     {
         //call this on click button
@@ -38,17 +33,9 @@ public class DisplayAndUpdate : MonoBehaviour
         DisplayStats(heroNumber);
     }
 
-    void UpdateStats()
-    {
-
-    }
-
     // Update is called once per frame
     void Update()
     {
-        if (StatsHaveChanged())
-        {
-            //update stats func;
-        }
+        
     }
 }
