@@ -23,7 +23,7 @@ public class DisplayAndUpdate : MonoBehaviour
     {
         characterNameUI.text = "" + accessorHero.heroes[heroNumber].characterName;
         heroTypeAndLevelUI.text = "" + accessorHero.heroes[heroNumber].heroType + " Lvl " + accessorHero.heroes[heroNumber].level;
-        statsUI.text = "Health: " + accessorHero.heroes[heroNumber].currentHealth + "\nSpeed:  " + accessorHero.heroes[heroNumber].currentSpeed + "\nAttack: " + accessorHero.heroes[heroNumber].damage;
+        statsUI.text = "Health: " + accessorHero.heroes[heroNumber].currentHealth + "\nSpeed: " + accessorHero.heroes[heroNumber].currentSpeed + "\nAttack: " + accessorHero.heroes[heroNumber].damage;
     }
 
     public void UpgradeLevel()
